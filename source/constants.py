@@ -1,0 +1,2 @@
+SECRET_KEY = "Streamoid.ai"
+ALGORITHM = "HS256"
