@@ -2,10 +2,17 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from source.model.csv import csv_template
+from source.db.db import init_db
 from source.register import registerRoutes 
+from contextlib import asynccontextmanager
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
 
+app = FastAPI(lifespan=lifespan)
 registerRoutes(app)
 
 @app.exception_handler(RequestValidationError)

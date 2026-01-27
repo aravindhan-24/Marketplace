@@ -5,7 +5,7 @@ from datetime import datetime, timezone, timedelta
 import pytest
 from fastapi import HTTPException
 
-from source.handlers.auth.authHandler import createJWTToken, verify_token, getToken
+from source.handlers.authHandler import createJWTToken, verify_token, getToken
 from source.constants import SECRET_KEY, ALGORITHM
 
 class DummyRequest:
