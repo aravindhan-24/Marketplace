@@ -1,2 +1,7 @@
 SECRET_KEY = "Streamoid.ai"
 ALGORITHM = "HS256"
+
+SAMPLE_ROW_COUNT = 10
+ENCODING = "utf-8"
+
+ENDPOINT = "/v1"
