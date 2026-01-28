@@ -80,6 +80,14 @@ source/
 ├── main.py          # App entry point
 ```
 
+---
+
+## 🗄️ Database Schema
+
+The database stores **metadata only**.  
+Actual files are stored on disk.
+
+---
 
 ### 🟦 files
 
@@ -142,19 +150,6 @@ Stores seller-to-template mappings.
 **Constraints**
 - UNIQUE(seller_id, template_id)
 
----
-
-Alright, here’s a **clean, professional “Setup Instructions” section** you can directly put into your `README.md`.
-This is written assuming **local development**, **FastAPI**, and **PostgreSQL**, and matches how your project is actually built.
-
----
-
-# ⚙️ Setup Instructions
-
-This section explains how to set up and run the project locally for development and testing.
-
----
-
 ## 🧩 Prerequisites
 
 Ensure the following are installed on your system:
@@ -195,10 +190,6 @@ venv\Scripts\activate
 ---
 
 ## 📦 Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
 
 > Make sure `fastapi`, `uvicorn`, `sqlalchemy`, `psycopg2`, `pydantic`, and `jwt` are installed.
 
@@ -271,9 +262,6 @@ http://localhost:8000
 ## 📘 API Documentation (Swagger)
 
 Once the server is running, access:
-
-* **Swagger UI**
-  👉 [http://localhost:8000/docs](http://localhost:8000/docs)
 
 * **OpenAPI JSON**
   👉 [http://localhost:8000/openapi.json](http://localhost:8000/openapi.json)
