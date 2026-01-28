@@ -33,9 +33,11 @@ def test_verify_token_valid_token():
 
 
 def test_verify_token_invalid_token():
-    decoded = verify_token("fake.token.value")
-    assert decoded == "Invalid token!"
-
+    with pytest.raises(HTTPException) as exc:
+        verify_token("fake.token.value")
+    
+    assert exc.value.status_code == 401
+    assert exc.value.detail == "Invalid token"
 
 def test_verify_token_expired_token():
     now = datetime.now(timezone.utc)
@@ -45,11 +47,13 @@ def test_verify_token_expired_token():
         "exp": now - timedelta(hours=1),
         "scope": ["READ", "WRITE"],
     }
-
     expired_token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
-    decoded = verify_token(expired_token)
-    assert decoded == "Token has expired!"
+    with pytest.raises(HTTPException) as exc:
+        verify_token(expired_token)
+    
+    assert exc.value.status_code == 401
+    assert exc.value.detail == "Token has expired"
 
 
 def test_getToken_valid_basic_auth_returns_token():
