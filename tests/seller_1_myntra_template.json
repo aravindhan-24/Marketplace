@@ -1,0 +1,68 @@
+{
+  "templateName": "MYNTRA",
+  "version": "1.0",
+  "fields": {
+    "productName": {
+      "required": true,
+      "type": "string",
+      "maxLen": 200
+    },
+    "brand": {
+      "required": true,
+      "type": "string"
+    },
+    "sku": {
+      "required": true,
+      "type": "string",
+      "unique": true
+    },
+    "category": {
+      "required": true,
+      "type": "string"
+    },
+    "price": {
+      "required": true,
+      "type": "number",
+      "min": 0
+    },
+    "mrp": {
+      "required": true,
+      "type": "number",
+      "min": 0
+    },
+    "color": {
+      "required": true,
+      "type": "string"
+    },
+    "images": {
+      "required": true,
+      "type": "urlArray",
+      "separator": "|",
+      "minItems": 1
+    },
+    "size": {
+      "required": true,
+      "type": "string"
+    },
+    "gender": {
+      "required": true,
+      "type": "enum",
+      "allowed": [
+        "Men",
+        "Women",
+        "Boys",
+        "Girls",
+        "Unisex"
+      ]
+    },
+    "description": {
+      "required": false,
+      "type": "string",
+      "maxLen": 500
+    },
+    "material": {
+      "required": false,
+      "type": "string"
+    }
+  }
+}

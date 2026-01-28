@@ -29,7 +29,6 @@ def read_csv_rows(file_path: str) -> List[Dict[str, str]]:
             reader = csv.DictReader(f)
 
             for row in reader:
-                # normalize immediately
                 rows.append({
                     k: "" if v is None else str(v).strip()
                     for k, v in row.items()

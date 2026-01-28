@@ -25,52 +25,83 @@ def build_validators(template_fields: dict):
 def validate_price(price, mrp):
     return price <= mrp
 
-
 def validate_csv(rows, mapping, template_fields):
-    logger.info(
-        f"CSV validation started | rows={len(rows)} | mapped_fields={len(mapping)}"
-    )
+    logger.info(f"CSV validation started | rows={len(rows)}")
+
+    if not rows:
+        return []
+
+    mapping = {
+        k: v.strip()
+        for k, v in mapping.items()
+        if v
+    }
+
+    required_fields = {
+        name for name, meta in template_fields.items()
+        if meta.get("required") is True
+    }
 
     validators, unique_fields = build_validators(template_fields)
     unique_seen = {f: set() for f in unique_fields}
 
+    csv_headers = {
+        h.strip().lower(): h for h in rows[0].keys()
+    }
+
+    missing = []
+    for field in required_fields:
+        csv_col = mapping.get(field)
+
+        if not csv_col:
+            missing.append({
+                "field": field,
+                "error": "Required field not mapped"
+            })
+        elif csv_col.strip().lower() not in csv_headers:
+            missing.append({
+                "field": field,
+                "expected_csv_column": csv_col
+        })
+
+    if missing:
+        raise ValueError(f"CSV missing required columns: {missing}")
     results = []
 
     for idx, row in enumerate(rows, start=1):
         errors = {}
 
-        for field, validator in validators.items():
-            csv_col = mapping.get(field)
+        mapped_row = {
+            field: row.get(csv_col, "")
+            for field, csv_col in mapping.items()
+        }
 
-            if not csv_col:
-                errors[field] = "Field not mapped"
+        for field, validator in validators.items():
+            value = mapped_row.get(field, "")
+
+            if not value and field in required_fields:
+                errors[field] = "Required field missing"
                 continue
 
-            value = row.get(csv_col)
-
-            if not validator(value):
+            if value and not validator(value):
                 errors[field] = "Validation failed"
                 continue
 
             if field in unique_fields:
                 v = str(value).strip()
-                if v == "":
-                    continue
-                if v in unique_seen[field]:
-                    errors[field] = "Duplicate value"
-                else:
-                    unique_seen[field].add(v)
+                if v:
+                    if v in unique_seen[field]:
+                        errors[field] = "Duplicate value"
+                    else:
+                        unique_seen[field].add(v)
 
-        if "price" in mapping and "mrp" in mapping:
-            try:
-                price = float(row.get(mapping["price"], 0))
-                mrp = float(row.get(mapping["mrp"], 0))
-
-                if price > mrp:
-                    errors["price"] = "Price cannot exceed MRP"
-
-            except Exception:
-                errors["price"] = "Invalid price/mrp"
+        try:
+            price = float(mapped_row.get("price", 0))
+            mrp = float(mapped_row.get("mrp", 0))
+            if price > mrp:
+                errors["price"] = "Price cannot exceed MRP"
+        except Exception:
+            errors["price"] = "Invalid price/mrp"
 
         results.append({
             "row": idx,
@@ -78,10 +109,7 @@ def validate_csv(rows, mapping, template_fields):
             "errors": errors
         })
 
-    valid_count = sum(r["valid"] for r in results)
-
-    logger.info(
-        f"CSV validation completed | total={len(results)} | valid={valid_count} | invalid={len(results) - valid_count}"
-    )
-
     return results
+
+
+

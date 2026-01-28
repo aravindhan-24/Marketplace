@@ -1,0 +1,11 @@
+Name,BrandName,Gender,Category,Color,Size,MRP,Price,SKU,Image1,Description,Material
+TShirt,Otto,Men,TShirt,Black,42,1390,1290,1000000,https://image1.jpg|https://image2.jpg|https://image3.jpg,"This is a TShirt",Polyester
+Shirt,RareRabbit,Men,Shirt,Blue,32,1688,1588,1000001,https://image1.jpg|https://image2.jpg|https://image3.jpg,"This is a Shirt",Wool
+Jean,RareRabbit,Women,Jean,Blue,34,1685,1585,1000003,https://image1.jpg|https://image2.jpg|https://image3.jpg,"This is a Jean",Khadi
+TShirt,Snitch,Unisex,TShirt,Blue,36,920,820,1000006,https://image1.jpg|https://image2.jpg|https://image3.jpg,"This is a TShirt",Polyester
+Shirt,Otto,Unisex,Shirt,Blue,40,1030,930,1000010,https://image1.jpg|https://image2.jpg|https://image3.jpg,"This is a Shirt",Cotton
+Jean,Roadstar,Unisex,Jean,Red,34,1701,1601,1000015,https://image1.jpg|https://image2.jpg|https://image3.jpg,"This is a Jean",Nylon
+TShirt,PetrEngland,Unisex,TShirt,Black,34,1761,1661,1000021,https://image1.jpg|https://image2.jpg|https://image3.jpg,"This is a TShirt",Silk
+Shirt,Roadstar,Women,Shirt,Black,38,1154,1054,1000028,https://image1.jpg|https://image2.jpg|https://image3.jpg,"This is a Shirt",Silk
+Shirt,Snitch,Unisex,Shirt,Red,40,1102,1002,1000036,https://image1.jpg|https://image2.jpg|https://image3.jpg,"This is a Shirt",Wool
+TShirt,Roadstar,Men,TShirt,Black,34,2161,2061,1000045,https://image1.jpg|https://image2.jpg|https://image3.jpg,"This is a TShirt",Polyester
