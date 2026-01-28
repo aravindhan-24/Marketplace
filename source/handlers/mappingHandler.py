@@ -4,7 +4,7 @@ import os
 import uuid
 from pathlib import Path
 
-from fastapi import HTTPException, Query, UploadFile, File
+from fastapi import HTTPException, Query, UploadFile, File, status
 from sqlalchemy.orm import Session
 
 from source.model.mapper.mapping_request import MappingRequest
@@ -219,7 +219,6 @@ def get_mapping_by_id(id: int):
         db.close()
         logger.debug("DB session closed for get_mapping_by_id")
 
-
 def validate_file(seller_id: str, mapping_file_id: int):
     logger.info(
         f"CSV validation started | seller_id={seller_id} | mapping_file_id={mapping_file_id}"
@@ -237,34 +236,28 @@ def validate_file(seller_id: str, mapping_file_id: int):
         )
 
         if not mapping:
-            logger.warning("Seller mapping not found during validation")
-            raise HTTPException(404, "Seller mapping not found")
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Seller mapping not found")
 
         mapping_file = db.query(Files).get(mapping.mapping_file_id)
         if not mapping_file:
-            logger.error("Mapping file missing during validation")
-            raise HTTPException(500, "Mapping file missing")
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Mapping file missing")
 
         mapping_json = load_json_file(mapping_file.file_path).get("mapping")
         if not mapping_json:
-            logger.warning("Invalid mapping JSON during validation")
-            raise HTTPException(400, "Invalid mapping file")
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid mapping file")
 
         template = db.query(MarketplaceTemplate).get(mapping.template_id)
         if not template:
-            logger.warning("Template not found during validation")
-            raise HTTPException(404, "Template not found")
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Template not found")
 
         template_file = db.query(Files).get(template.file_id)
         if not template_file:
-            logger.error("Template file missing during validation")
-            raise HTTPException(500, "Template file missing")
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Template file missing")
 
         template_json = load_json_file(template_file.file_path)
         template_fields = template_json.get("fields")
         if not template_fields:
-            logger.warning("Invalid template JSON during validation")
-            raise HTTPException(400, "Invalid template file")
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid template file")
 
         csv_upload = (
             db.query(SellerCsvUpload)
@@ -274,13 +267,11 @@ def validate_file(seller_id: str, mapping_file_id: int):
         )
 
         if not csv_upload:
-            logger.warning("No CSV upload found for seller during validation")
-            raise HTTPException(404, "No CSV uploaded for seller")
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "No CSV uploaded for seller")
 
         csv_file = db.query(Files).get(csv_upload.csv_file_id)
         if not csv_file:
-            logger.error("CSV file missing during validation")
-            raise HTTPException(500, "CSV file missing")
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "CSV file missing")
 
         rows = read_csv_rows(csv_file.file_path)
         rows = [
@@ -288,14 +279,38 @@ def validate_file(seller_id: str, mapping_file_id: int):
             for row in rows
         ]
 
-        result = validate_csv(
-            rows=rows,
-            mapping=mapping_json,
-            template_fields=template_fields
-        )
+        try:
+            result = validate_csv(
+                rows=rows,
+                mapping=mapping_json,
+                template_fields=template_fields
+            )
+        except ValueError as e:
+            logger.warning(
+                f"CSV validation failed | seller_id={seller_id} | reason={str(e)}"
+            )
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=str(e)
+            )
+        except KeyError as e:
+            logger.error(
+                f"Template configuration error | missing key={e}"
+            )
+            raise HTTPException(
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Template configuration error: missing {e}"
+            )
+        except Exception as e:
+            logger.exception("Unexpected CSV validation error")
+            raise HTTPException(
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Internal validation error"
+            )
 
         logger.info(
-            f"CSV validation completed | seller_id={seller_id} | total={len(result)} | valid={sum(r['valid'] for r in result)}"
+            f"CSV validation completed | seller_id={seller_id} | total={len(result)} | "
+            f"valid={sum(r['valid'] for r in result)}"
         )
 
         return {
