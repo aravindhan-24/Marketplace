@@ -2,9 +2,11 @@ from sqlalchemy import create_engine
 
 from source.db.base import Base
 from source.db.model import MarketplaceTemplate, SellerCsvUpload, Files, SellerTemplateMapping
-from source.config.config import get_config
+import os 
 
-DATABASE_URL = get_config("database.url")
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set")
 
 engine = create_engine(
     DATABASE_URL,

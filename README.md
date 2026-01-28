@@ -1,19 +1,21 @@
-
-# 📐 System Design & Database Schema
+# System Design & Database Schema
 
 ## Overview
 This project is a **Marketplace CSV Validation Service** built using **FastAPI**.  
 It allows marketplaces to define validation templates and sellers to upload CSV files and mappings, which are then validated against those templates.
 
+This project is designed to be run using **Docker and Docker Compose**.  
+Manual Python virtualenv, dependency installation, and database setup are not required.
+
 ---
 
-## 🧠 High-Level System Design
+## High-Level System Design
 
 ### Core Concept
 The system separates responsibilities clearly:
 
-- **Marketplace** defines *what data is expected*
-- **Seller** provides *how their CSV maps to that expectation*
+- Marketplace defines what data is expected
+- Seller provides how their CSV maps to that expectation
 
 ```
 Marketplace Template (rules)
@@ -33,75 +35,59 @@ Seller Mapping (JSON)
 
 ---
 
-## 🧩 Major Components
+## Major Components
 
-### 1. API Layer (FastAPI)
+### API Layer (FastAPI)
 - Handles requests and responses
 - Registers routes dynamically
 - Applies authentication middleware
 
-### 2. Authentication
+### Authentication
 - JWT-based authentication
 - Middleware validates token for all protected routes
 
-### 3. Handlers
+### Handlers
 - Encapsulate business logic
-- Examples:
-  - CSV upload
-  - Template upload
-  - Mapping upload
-  - CSV validation
+- CSV upload, template upload, mapping upload, validation
 
-### 4. Validation Engine
-- Applies field-level rules defined in templates
-- Supports:
-  - Required fields
-  - Type validation
-  - Length & range checks
-  - Enum validation
-  - Uniqueness constraints
-  - Cross-field validation (price ≤ MRP)
+### Validation Engine
+- Rule-based CSV validation
+- Required fields, type checks, enums, uniqueness
+- Cross-field validation (price ≤ MRP)
 
-### 5. Storage
-- **Filesystem**: Stores CSV, template JSON, mapping JSON
-- **Database**: Stores metadata and relationships
+### Storage
+- Filesystem (Docker volumes): CSVs, templates, mappings, logs
+- PostgreSQL: Metadata and relationships
 
 ---
 
-## 🗂️ Directory Architecture
+## Directory Architecture
 
 ```
 source/
-├── handlers/        # API handlers
-├── utility/         # Validators & helpers
-├── db/              # DB models & session
-├── routes.py        # Route definitions
-├── register.py      # Dynamic route registration
-├── main.py          # App entry point
+├── handlers/
+├── utility/
+├── db/
+├── routes.py
+├── register.py
+├── main.py
 ```
 
 ---
 
-## 🗄️ Database Schema
+## Database Schema
 
-The database stores **metadata only**.  
-Actual files are stored on disk.
+The database stores metadata only.  
+Actual files are stored on disk via Docker volumes.
 
----
-
-### 🟦 files
-
-Stores all uploaded files.
-
+### files
 | Column | Type | Description |
 |------|------|------------|
-| id | bigint (PK) | File identifier |
-| file_name | string | Original filename |
-| file_path | string (unique) | Disk path |
-| file_type | string | csv / json |
-| created_at | timestamp | Upload time |
-
----
+| id | bigint (PK) |
+| file_name | string |
+| file_path | string |
+| file_type | string |
+| created_at | timestamp |
 
 ### 🟦 marketplace_templates
 
@@ -150,134 +136,39 @@ Stores seller-to-template mappings.
 **Constraints**
 - UNIQUE(seller_id, template_id)
 
-## 🧩 Prerequisites
+---
 
-Ensure the following are installed on your system:
+## Running the Application (Docker)
 
-* **Python** ≥ 3.10
-* **pip** (comes with Python)
-* **PostgreSQL** ≥ 13
-* **Git**
-* (Optional) **virtualenv** or **venv**
+### Prerequisites
+- Docker
+- Docker Compose
 
 ---
 
-## 📥 Clone the Repository
+### Build and Run
 
 ```bash
-git clone <repository-url>
-cd <project-root>
+docker compose up --build
 ```
 
 ---
 
-## 🐍 Create & Activate Virtual Environment
+### Application Access
 
-### Linux / macOS
+- API: http://localhost:8000
+- Swagger UI: http://localhost:8000/docs
+- OpenAPI JSON: http://localhost:8000/openapi.json
+
+---
+
+## Authentication
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
+curl -u admin:Admin@123 http://localhost:8000/token
 ```
 
-### Windows
-
-```bash
-python -m venv venv
-venv\Scripts\activate
-```
-
----
-
-## 📦 Install Dependencies
-
-> Make sure `fastapi`, `uvicorn`, `sqlalchemy`, `psycopg2`, `pydantic`, and `jwt` are installed.
-
----
-
-## 🗄️ Database Setup (PostgreSQL)
-
-### 1️⃣ Create Database
-
-```sql
-CREATE DATABASE marketplace;
-```
-
-### 2️⃣ Create User (optional but recommended)
-
-```sql
-CREATE USER marketplace_user WITH PASSWORD 'password';
-GRANT ALL PRIVILEGES ON DATABASE marketplace TO marketplace_user;
-```
-
----
-
-## 🔐 Configuration Setup
-
-Create a `config.json` file in the **project root**.
-
-### 📄 `config.json`
-
-```json
-{
-  "database": {
-    "url": "postgresql://marketplace_user:password@localhost:5432/marketplace"
-  }
-}
-```
-
-> ⚠️ Do not commit `config.json` to version control.
-
----
-
-## 📁 Directory Initialization
-
-The following directories are required and will be auto-created on startup:
-
-```
-templates/   # Marketplace templates
-uploads/     # Seller CSV uploads
-mapping/     # Seller mapping JSON files
-logs/        # Application logs
-```
-
-No manual action is needed.
-
----
-
-## ▶️ Run the Application
-
-```bash
-uvicorn source.main:app --reload
-```
-
-The application will start at:
-
-```
-http://localhost:8000
-```
-
----
-
-## 📘 API Documentation (Swagger)
-
-Once the server is running, access:
-
-* **OpenAPI JSON**
-  👉 [http://localhost:8000/openapi.json](http://localhost:8000/openapi.json)
-
----
-
-## 🔑 Authentication Flow (Local)
-
-1. Call `/token` using **Basic Auth**
-
-   * Username: `admin`
-   * Password: `Admin@123`
-
-2. Receive JWT token
-
-3. Use token in all protected APIs:
+Use the token as:
 
 ```http
 Authorization: Bearer <JWT_TOKEN>
@@ -285,49 +176,255 @@ Authorization: Bearer <JWT_TOKEN>
 
 ---
 
-## 🧪 Run Tests
+## Running Tests
 
 ```bash
-pytest
-```
-
-(Optional)
-
-```bash
-pytest --cov=source
+docker compose exec api pytest
 ```
 
 ---
 
-## 🪵 Logs
-
-Logs are written to:
+## Logs
 
 ```
 logs/app.log
 ```
 
-With:
+---
 
-* File rotation
-* Console logging enabled
+## Stopping the Application
+
+```bash
+docker compose down
+```
+
+To reset database data:
+
+```bash
+docker compose down -v
+```
+
+
+#  Marketplace API Documentation
+
+Base URL:
+```
+http://localhost:8000
+```
+
+Authentication:
+- **Basic Auth** → Token generation, CSV upload, mapping
+- **Bearer Token (JWT)** → Template APIs
 
 ---
 
-## 🛑 Common Issues & Fixes
+##  Get Access Token
 
-### Database connection error
+**GET** `/token`
 
-* Ensure PostgreSQL is running
-* Verify `database.url` in `config.json`
+Generates a JWT token using **Basic Authentication**.
 
-### Permission issues
-
-* Ensure write access for `templates/`, `uploads/`, `mapping/`, `logs/`
-
-### Port already in use
-
-```bash
-uvicorn source.main:app --reload --port 8080
+### Request
+```http
+GET /token
+Authorization: Basic <base64(username:password)>
 ```
 
+### Response – 200 OK
+```json
+{
+  "creadentials": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+---
+
+##  Upload Marketplace Template
+
+**POST** `/v1/template`
+
+Uploads a marketplace template file.
+
+### Authentication
+`Bearer <JWT_TOKEN>`
+
+### Request
+`multipart/form-data`
+
+| Field | Type | Description |
+|------|------|-------------|
+| file | file | Template definition file |
+
+### Response – 200 OK
+```json
+{
+  "message": "Template uploaded successfully",
+  "templateId": 1,
+  "fileId": 1,
+  "template_name": "MYNTRA",
+  "version": "1.0"
+}
+```
+
+---
+
+##  Get Template by Marketplace
+
+**GET** `/v1/template?marketplace_name=MYNTRA`
+
+Fetches template details for a given marketplace.
+
+### Authentication
+`Bearer <JWT_TOKEN>`
+
+### Query Parameters
+
+| Name | Type | Required |
+|------|------|----------|
+| marketplace_name | string | Yes |
+
+### Response – 200 OK
+```json
+{
+  "marketplace": "MYNTRA",
+  "template": {
+    "templateName": "MYNTRA",
+    "version": "1.0",
+    "fields": {
+      "productName": {
+        "required": true,
+        "type": "string",
+        "maxLen": 200
+      }
+    }
+  }
+}
+```
+
+---
+
+##  Upload Seller CSV File
+
+**POST** `/v1/uploadfile?seller_id=1`
+
+Uploads a seller product CSV file.
+
+### Authentication
+`Basic Auth`
+
+### Query Parameters
+
+| Name | Type | Required |
+|------|------|----------|
+| seller_id | integer | Yes |
+
+### Request
+`multipart/form-data`
+
+| Field | Type | Description |
+|------|------|-------------|
+| file | file | CSV file |
+
+### Response – 200 OK
+```json
+{
+  "csvUploadId": 1,
+  "fileId": 2,
+  "headers": ["productName", "brand", "sku"],
+  "rowCount": 10,
+  "sampleRows": [
+    {
+      "productName": "TShirt",
+      "brand": "Otto",
+      "sku": "1000000"
+    }
+  ]
+}
+```
+
+---
+
+##  Upload Seller Mapping
+
+**POST** `/v1/sellermapping?seller_id=1&template_id=1`
+
+Uploads a seller-to-template mapping file.
+
+### Authentication
+`Basic Auth`
+
+### Query Parameters
+
+| Name | Type | Required |
+|------|------|----------|
+| seller_id | integer | Yes |
+| template_id | integer | Yes |
+
+### Request
+`multipart/form-data`
+
+| Field | Type | Description |
+|------|------|-------------|
+| file | file | Mapping file |
+
+### Response – 200 OK
+```json
+{
+  "status": "success",
+  "mapping_id": 1,
+  "mapping_file_id": 3,
+  "template_id": 1,
+  "marketplace": "MYNTRA"
+}
+```
+
+---
+
+##  Validate Mapping & Apply Rules
+
+**POST** `/v1/mapping?seller_id=1&mapping_file_id=3`
+
+Validates uploaded CSV rows against the marketplace template.
+
+### Authentication
+`Basic Auth`
+
+### Query Parameters
+
+| Name | Type | Required |
+|------|------|----------|
+| seller_id | integer | Yes |
+| mapping_file_id | integer | Yes |
+
+### Response – 200 OK
+```json
+{
+  "seller_id": "1",
+  "mapping_file_id": 3,
+  "total": 10,
+  "valid": 0,
+  "errors": [
+    {
+      "row": 1,
+      "valid": false,
+      "errors": {
+        "productName": "Validation failed",
+        "sku": "Validation failed"
+      }
+    }
+  ]
+}
+```
+
+---
+
+##  Health Check
+
+**GET** `/v1`
+
+### Response – 200 OK
+```json
+{
+  "status": "ok"
+}
+```

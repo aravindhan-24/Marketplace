@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "title": "MarketPlace",
-    "description": "APIs for uploading Marketplace templates, seller mappings, files, and authentication",
+    "description": "APIs for uploading marketplace templates, seller mappings, CSV files, validation, and authentication",
     "version": "1.0.0"
   },
   "servers": [
@@ -27,14 +27,19 @@
     "/v1": {
       "get": {
         "summary": "Health check",
-        "description": "Used to verify server is up and running",
         "responses": {
           "200": {
             "description": "Server is running",
             "content": {
               "application/json": {
-                "example": {
-                  "status": "ok"
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    }
+                  }
                 }
               }
             }
@@ -43,9 +48,8 @@
       }
     },
     "/token": {
-      "post": {
+      "get": {
         "summary": "Get access token",
-        "description": "Generates JWT token using Basic authentication",
         "security": [
           {
             "BasicAuth": []
@@ -56,10 +60,15 @@
             "description": "Token generated successfully",
             "content": {
               "application/json": {
-                "example": {
-                  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-                  "token_type": "bearer",
-                  "expires_in": 3600
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "creadentials": {
+                      "type": "string",
+                      "description": "JWT token",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
                 }
               }
             }
@@ -93,12 +102,41 @@
         },
         "responses": {
           "200": {
-            "description": "Template uploaded successfully"
+            "description": "Template uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Template uploaded successfully"
+                    },
+                    "templateId": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "fileId": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "template_name": {
+                      "type": "string",
+                      "example": "MYNTRA"
+                    },
+                    "version": {
+                      "type": "string",
+                      "example": "1.0"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
       "get": {
-        "summary": "Get template by marketplace",
+        "summary": "Get template by marketplace name",
         "security": [
           {
             "BearerAuth": []
@@ -117,7 +155,65 @@
         ],
         "responses": {
           "200": {
-            "description": "Template fetched successfully"
+            "description": "Template fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "marketplace": {
+                      "type": "string",
+                      "example": "MYNTRA"
+                    },
+                    "template": {
+                      "type": "object",
+                      "properties": {
+                        "templateName": {
+                          "type": "string",
+                          "example": "MYNTRA"
+                        },
+                        "version": {
+                          "type": "string",
+                          "example": "1.0"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "object",
+                            "properties": {
+                              "required": {
+                                "type": "boolean"
+                              },
+                              "type": {
+                                "type": "string"
+                              },
+                              "maxLen": {
+                                "type": "integer",
+                                "nullable": true
+                              },
+                              "min": {
+                                "type": "number",
+                                "nullable": true
+                              },
+                              "unique": {
+                                "type": "boolean",
+                                "nullable": true
+                              },
+                              "allowed": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -159,7 +255,43 @@
         },
         "responses": {
           "200": {
-            "description": "File uploaded successfully"
+            "description": "File uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "csvUploadId": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "fileId": {
+                      "type": "integer",
+                      "example": 2
+                    },
+                    "headers": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "rowCount": {
+                      "type": "integer",
+                      "example": 10
+                    },
+                    "sampleRows": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "additionalProperties": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -210,14 +342,43 @@
         },
         "responses": {
           "200": {
-            "description": "Seller mapping file uploaded"
+            "description": "Seller mapping file uploaded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "success"
+                    },
+                    "mapping_id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "mapping_file_id": {
+                      "type": "integer",
+                      "example": 3
+                    },
+                    "template_id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "marketplace": {
+                      "type": "string",
+                      "example": "MYNTRA"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
     "/v1/mapping": {
       "post": {
-        "summary": "Process mapping for seller, apply validation checks",
+        "summary": "Validate mapping and apply template rules",
         "security": [
           {
             "BasicAuth": []
@@ -245,7 +406,52 @@
         ],
         "responses": {
           "200": {
-            "description": "Mapping processed successfully"
+            "description": "Mapping processed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "seller_id": {
+                      "type": "string",
+                      "example": "1"
+                    },
+                    "mapping_file_id": {
+                      "type": "integer",
+                      "example": 3
+                    },
+                    "total": {
+                      "type": "integer",
+                      "example": 10
+                    },
+                    "valid": {
+                      "type": "integer",
+                      "example": 0
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "row": {
+                            "type": "integer"
+                          },
+                          "valid": {
+                            "type": "boolean"
+                          },
+                          "errors": {
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
