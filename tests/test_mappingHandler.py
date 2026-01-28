@@ -25,16 +25,16 @@ def test_validate_file_success(mock_val_csv, mock_read_csv, mock_load_json, mock
     )
     
     mock_db.query.return_value.get.side_effect = [
-        MagicMock(file_path="map.json"),  # mapping_file
-        MagicMock(file_id=20),            # template
-        MagicMock(file_path="temp.json"), # template_file
-        MagicMock(csv_file_id=30),        # csv_upload
-        MagicMock(file_path="data.csv")   # csv_file
+        MagicMock(file_path="map.json"),  
+        MagicMock(file_id=20),            
+        MagicMock(file_path="temp.json"), 
+        MagicMock(csv_file_id=30),        
+        MagicMock(file_path="data.csv")  
     ]
 
     mock_load_json.side_effect = [
-        {"mapping": {"source_col": "target_col"}}, # mapping_json
-        {"fields": [{"name": "target_col", "required": True}]} # template_json
+        {"mapping": {"source_col": "target_col"}},
+        {"fields": [{"name": "target_col", "required": True}]} 
     ]
     
     mock_read_csv.return_value = csv_data

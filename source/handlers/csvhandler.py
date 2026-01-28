@@ -23,7 +23,6 @@ def uploadfile(
 
     db: Session = SessionLocal()
     try:
-        # Validate file type
         if Path(file.filename).suffix.lower() != ".csv":
             logger.warning(
                 f"Invalid file type uploaded | seller_id={seller_id} | filename={file.filename}"
@@ -33,13 +32,11 @@ def uploadfile(
         upload_uuid = str(uuid.uuid4())
         file_path = UPLOAD_DIR / f"{upload_uuid}.csv"
 
-        # Save file to disk
         with open(file_path, "wb") as f:
             f.write(file.file.read())
 
         logger.info(f"CSV file saved | path={file_path}")
 
-        # Read CSV
         with open(file_path, newline="", encoding=ENCODING) as f:
             reader = csv.DictReader(f)
             headers = reader.fieldnames or []
@@ -55,7 +52,6 @@ def uploadfile(
             f"CSV parsed successfully | rows={row_count} | headers={len(headers)}"
         )
 
-        # Store file record
         db_file = Files(
             file_name=file.filename,
             file_path=str(file_path),
@@ -67,7 +63,6 @@ def uploadfile(
 
         logger.info(f"File record created | file_id={db_file.id}")
 
-        # Store seller upload mapping
         csv_upload = SellerCsvUpload(
             seller_id=seller_id,
             csv_file_id=db_file.id
