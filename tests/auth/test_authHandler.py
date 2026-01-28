@@ -6,7 +6,7 @@ import pytest
 from fastapi import HTTPException
 
 from source.handlers.authHandler import createJWTToken, verify_token, getToken
-from source.constants import SECRET_KEY, ALGORITHM
+from source.constants.constants import SECRET_KEY, ALGORITHM
 
 class DummyRequest:
     def __init__(self, headers: dict):

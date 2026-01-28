@@ -1,0 +1,5 @@
+{
+  "database": {
+    "url": "postgresql://postgres:<USER_NAME>@<DOMAIN>:<PORT>/<DATABASE_NAME>"
+  }
+}

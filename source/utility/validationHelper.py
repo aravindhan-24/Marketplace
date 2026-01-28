@@ -1,7 +1,12 @@
+import logging
 from source.utility.validators import TYPE_DISPATCHER
+
+logger = logging.getLogger(__name__)
 
 
 def build_validators(template_fields: dict):
+    logger.debug("Building validators from template fields")
+
     validators = {}
     unique_fields = set()
 
@@ -9,6 +14,10 @@ def build_validators(template_fields: dict):
         validators[field] = TYPE_DISPATCHER[rule["type"]](rule)
         if rule.get("unique"):
             unique_fields.add(field)
+
+    logger.debug(
+        f"Validators built | total={len(validators)} | unique_fields={len(unique_fields)}"
+    )
 
     return validators, unique_fields
 
@@ -18,6 +27,10 @@ def validate_price(price, mrp):
 
 
 def validate_csv(rows, mapping, template_fields):
+    logger.info(
+        f"CSV validation started | rows={len(rows)} | mapped_fields={len(mapping)}"
+    )
+
     validators, unique_fields = build_validators(template_fields)
     unique_seen = {f: set() for f in unique_fields}
 
@@ -58,11 +71,17 @@ def validate_csv(rows, mapping, template_fields):
 
             except Exception:
                 errors["price"] = "Invalid price/mrp"
-                
+
         results.append({
-                    "row": idx,
-                    "valid": not errors,
-                    "errors": errors
-                })
+            "row": idx,
+            "valid": not errors,
+            "errors": errors
+        })
+
+    valid_count = sum(r["valid"] for r in results)
+
+    logger.info(
+        f"CSV validation completed | total={len(results)} | valid={valid_count} | invalid={len(results) - valid_count}"
+    )
 
     return results

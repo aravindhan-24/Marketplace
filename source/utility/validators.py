@@ -1,10 +1,15 @@
+import logging
 from urllib.parse import urlparse
+
+logger = logging.getLogger(__name__)
+
 
 def is_not_empty(v):
     return v is not None and str(v).strip() != ""
 
 
 def validate_str(rule):
+    logger.debug("Creating string validator")
     required = rule.get("required", False)
     max_len = rule.get("maxLen")
 
@@ -19,6 +24,7 @@ def validate_str(rule):
 
 
 def validate_int(rule):
+    logger.debug("Creating int validator")
     required = rule.get("required", False)
     min_v = rule.get("min")
 
@@ -37,6 +43,7 @@ def validate_int(rule):
 
 
 def validate_number(rule):
+    logger.debug("Creating number validator")
     required = rule.get("required", False)
     min_v = rule.get("min")
 
@@ -55,6 +62,7 @@ def validate_number(rule):
 
 
 def validate_enum(rule):
+    logger.debug("Creating enum validator")
     required = rule.get("required", False)
     allowed = set(rule.get("allowed", []))
 
@@ -67,6 +75,7 @@ def validate_enum(rule):
 
 
 def validate_url(rule):
+    logger.debug("Creating URL validator")
     required = rule.get("required", False)
 
     def validator(v):
@@ -77,7 +86,9 @@ def validate_url(rule):
 
     return validator
 
+
 def validate_url_array(rule):
+    logger.debug("Creating URL array validator")
     required = rule.get("required", False)
 
     def validator(v):

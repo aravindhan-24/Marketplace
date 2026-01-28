@@ -1,5 +1,5 @@
 from typing import TypedDict,Literal
-from source.constants import ENDPOINT
+from source.constants.constants import ENDPOINT
 
 Method = Literal["GET","POST","PUT","PATCH","DELETE"]
 
@@ -12,7 +12,7 @@ class RouteDef(TypedDict):
 routes: list[RouteDef] = [
     {
         "method":"GET",
-        "path": ENDPOINT+"/getToken",
+        "path": "/token",
         "handler":"source.handlers.authHandler:getToken",
         "description":"Provided JWT token if valid credentials passed",
     },

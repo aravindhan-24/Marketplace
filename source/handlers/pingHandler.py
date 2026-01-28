@@ -1,2 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 def ping():
-    return {"message":"ok"}
+    logger.debug("Ping endpoint called")
+    return {"message": "ok"}
