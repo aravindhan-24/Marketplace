@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 
 from source.db.base import Base
-from source.db.model import MarketplaceTemplate, SellerMapping
+from source.db.model import MarketplaceTemplate, SellerCsvUpload, Files, SellerTemplateMapping
 
 DATABASE_URL = "postgresql://postgres:admin@localhost:5432/streamoid"
 

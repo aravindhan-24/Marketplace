@@ -2,13 +2,24 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from source.model.csv import csv_template
 from source.db.db import init_db
 from source.register import registerRoutes 
 from contextlib import asynccontextmanager
+from constants import TEMPLATE_DIR, UPLOAD_DIR,MAPPING_UPLOAD_DIR
+from pathlib import Path
+
+def inii_dirs():
+    dirs = [
+        TEMPLATE_DIR,
+        UPLOAD_DIR,
+        MAPPING_UPLOAD_DIR,
+    ]
+    for d in dirs:
+        Path(d).mkdir(parents=True, exist_ok=True)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    inii_dirs()
     init_db()
     yield
 

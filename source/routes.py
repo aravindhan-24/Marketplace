@@ -44,19 +44,25 @@ routes: list[RouteDef] = [
         "method":"POST",
         "path": ENDPOINT + "/sellermapping",
         "handler":"source.handlers.mappingHandler:mapper",
-        "description": "Endpoint to upload a mapping json by seller"
+        "description": "Endpoint to upload a mapping by seller"
     },
     {
         "method":"GET",
         "path": ENDPOINT + "/sellermapping",
-        "handler":"source.handlers.mappingHandler:get_mapping",
-        "description": "Endpoint to view a mapping json by seller"
+        "handler":"source.handlers.mappingHandler:get_mappings_by_seller",
+        "description": "Endpoint to view all mappings by seller"
     },
     {
         "method":"GET",
-        "path": ENDPOINT + "/sellermapping/{mapping_id}",
+        "path": ENDPOINT + "/sellermapping/{id}",
         "handler":"source.handlers.mappingHandler:get_mapping_by_id",
-        "description": "Endpoint to view a mapping json by seller"
+        "description": "Endpoint to view a mapping details by seller"
+    },
+        {
+        "method":"POST",
+        "path": ENDPOINT + "/mapping",
+        "handler":"source.handlers.mappingHandler:validate_file",
+        "description": "Endpoint to view a mapping details by seller"
     },
 ]
 
