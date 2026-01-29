@@ -22,7 +22,7 @@ services:
   api:
     build: .
     container_name: marketplace-api
-    restart: no
+    restart: always
     depends_on:
       postgres:
         condition: service_healthy  
