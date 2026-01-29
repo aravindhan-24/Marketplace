@@ -10,16 +10,22 @@ services:
       POSTGRES_USER: marketplace_user
       POSTGRES_PASSWORD: marketplace_pass
     ports:
-      - "5432:5432"
+      - "5433:5432"   
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U marketplace_user"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   api:
     build: .
     container_name: marketplace-api
     restart: no
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy  
     ports:
       - "8000:8000"
     environment:
